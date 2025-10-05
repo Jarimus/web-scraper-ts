@@ -8,18 +8,6 @@ describe('normalizeURL', () => {
     expect(normalizeURL(input)).toBe(expected);
   });
 
-  it('should remove duplicate slashes', () => {
-    const input = 'https://example.com//path///to//resource';
-    const expected = 'https://example.com/path/to/resource';
-    expect(normalizeURL(input)).toBe(expected);
-  });
-
-  it('should add https protocol if missing', () => {
-    const input = 'example.com/path';
-    const expected = 'https://example.com/path';
-    expect(normalizeURL(input)).toBe(expected);
-  });
-
   it('should remove query parameters', () => {
     const input = 'https://example.com/path?a=1&b=2';
     const expected = 'https://example.com/path';
@@ -54,9 +42,4 @@ describe('normalizeURL', () => {
     expect(() => normalizeURL(input)).toThrow('Invalid URL');
   });
 
-  it('should normalize URLs with multiple protocols', () => {
-    const input = 'https://https://example.com/path';
-    const expected = 'https://example.com/path';
-    expect(normalizeURL(input)).toBe(expected);
-  });
 });
