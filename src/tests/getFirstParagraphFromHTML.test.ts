@@ -93,8 +93,8 @@ describe('getFirstParagraphFromHTML', () => {
     expect(getFirstParagraphFromHTML(html)).toBe('First main paragraph');
   });
 
-  // Additional Test 3: No p in <main>, but p elsewhere, return empty string
-  it('should return empty string if <main> exists but has no p tags, return outside p tags', () => {
+  // Additional Test 3: No p in <main>, but p elsewhere, return outside p
+  it('should return outside <p> if <main> exists but has no p tags', () => {
     const html = `
       <header><p>Header paragraph</p></header>
       <main><div>No paragraph here</div></main>

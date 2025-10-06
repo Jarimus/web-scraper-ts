@@ -6,6 +6,36 @@ export function normalizeURL(inputURL:string): string {
   return `${urlObject.protocol}//${urlObject.hostname}${urlObject.pathname.replace(/\/$/, "")}`
 }
 
+type ExtractedPageData = {
+  url: string,
+  h1: string,
+  first_paragraph: string,
+  outgoing_links: string[],
+  image_urls: string[]
+}
+
+export function extractPageData(html: string, pageURL: string): ExtractedPageData {
+  if (html === "" || pageURL === "") {
+    return {
+      url: pageURL,
+      h1: "",
+      first_paragraph: "",
+      outgoing_links: [],
+      image_urls: []
+    }
+  }
+  if ((typeof html !== "string") || (typeof pageURL !== "string")) {
+    throw new Error("html or pageURL parameter is not a string")
+  }
+  return {
+    url: pageURL,
+    h1: getH1FromHTML(html),
+    first_paragraph: getFirstParagraphFromHTML(html),
+    outgoing_links: getURLsFromHTML(html, pageURL),
+    image_urls: getImagesFromHTML(html, pageURL)
+  }
+}
+
 export function getH1FromHTML(html: string): string {
   if (typeof html !== "string") {
     throw Error("html is not a string")
@@ -23,13 +53,13 @@ export function getFirstParagraphFromHTML(html: string): string {
     throw Error("html is not a string")
   }
   const doc = new JSDOM(html)
-  const mainSection = doc.window.document.querySelector("main")
   let firstPara = ""
+  const mainSection = doc.window.document.querySelector("main")
   if (mainSection) {
     const queryMainP = mainSection.querySelector("p")
     firstPara = queryMainP ? queryMainP.textContent : ""
   } 
-  if (firstPara === "") {
+  if (firstPara == "") {
     const queryP = doc.window.document.querySelector("p")
     firstPara = queryP ? queryP.textContent : ""
   }
