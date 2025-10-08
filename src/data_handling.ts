@@ -74,8 +74,9 @@ export function getURLsFromHTML(html: string, baseURL: string): string[] {
     throw Error("html is not a string")
   }
   const result: string[] = []
-  const doc = new JSDOM(html)
-  const queryA = doc.window.document.querySelectorAll("a")
+  const dom = new JSDOM(html)
+  const doc = dom.window.document
+  const queryA = doc.querySelectorAll("a")
   for (const a of queryA) {
     const link = a.getAttribute("href")
     if (link) {
@@ -95,8 +96,9 @@ export function getImagesFromHTML(html: string, baseURL: string): string[] {
   }
 
   const result: string[] = []
-  const doc = new JSDOM(html)
-  const queryA = doc.window.document.querySelectorAll("img")
+  const dom = new JSDOM(html)
+  const doc = dom.window.document
+  const queryA = doc.querySelectorAll("img")
   for (const a of queryA) {
     const link = a.getAttribute("src")
     if (link) {

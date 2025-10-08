@@ -12,7 +12,7 @@ class ConcurrentCrawler {
   constructor(baseUrl: string, limit: number, maxPages: number) {
     this.baseUrl = baseUrl
     this.pages = {}
-    this.maxPages = maxPages
+    this.maxPages = Math.max(1, maxPages)
     this.limit = pLimit(limit)
     this.shouldStop = false
   }
@@ -87,7 +87,7 @@ class ConcurrentCrawler {
     }
 
     // Extract and store page data
-    this.pages[normalizedCurrentURL] = extractPageData(html, this.baseUrl)
+    this.pages[normalizedCurrentURL] = extractPageData(html, currentURL)
 
     // Get next urls to crawl
     const newURLs = getURLsFromHTML(html, this.baseUrl)

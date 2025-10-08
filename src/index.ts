@@ -1,6 +1,7 @@
 import crawlSiteAsync from './concurrent_crawler'
 import { crawlPage } from './crawl'
 import { getHTML } from './getHTML'
+import writeCSVReport from './report'
 
 async function main() {
   const args = process.argv.slice(2)
@@ -12,7 +13,7 @@ async function main() {
     console.log("Too many arguments")
     process.exit(1)
   }
-  let limit = 1
+  let limit = 3
   let maxPages = 25
   if (args.length >= 2) {
     try {
@@ -28,17 +29,24 @@ async function main() {
   console.log(`Starting crawl: ${url}`)
 
   // const pageCounts = await crawlPage(url)
-  const pageCounts = await crawlSiteAsync(url, limit, maxPages)
+  const pageData = await crawlSiteAsync(url, limit, maxPages)
 
-  if (!pageCounts) {
+  if (!pageData) {
     return console.log("No pages")
   }
 
-  console.log(`Crawled ${Object.keys(pageCounts).length} pages.`)
+  console.log(`Crawled ${Object.keys(pageData).length} pages.`)
   console.log("Internal links:")
-  for (const key in pageCounts) {
-    console.log(`${key}: ${pageCounts[key].visits}`)
+  for (const key in pageData) {
+    console.log(`${key}: ${pageData[key].visits}`)
   }
+
+  const reportFilename = 'report.csv'
+  try {
+    writeCSVReport(pageData, reportFilename)
+    console.log(`Report saved to ${reportFilename}`)
+  } catch(error) {console.log(`Error writing report to file: ${error}`)}
+  
 }
 
 main();
