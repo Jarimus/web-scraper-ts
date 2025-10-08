@@ -1,4 +1,4 @@
-import { getH1FromHTML } from '../crawl'
+import { getH1FromHTML } from '../data_handling'
 import { describe, it, expect } from 'vitest'
 
 describe('getH1FromHTML', () => {

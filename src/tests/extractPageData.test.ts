@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractPageData } from '../crawl'
+import { extractPageData } from '../data_handling'
 
 describe('extractPageData', () => {
   it('should extract basic page data correctly', () => {

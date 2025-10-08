@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeURL } from '../crawl'
+import { normalizeURL } from '../data_handling'
 
 describe('normalizeURL', () => {
   it('should normalize URL with mixed case to lowercase', () => {

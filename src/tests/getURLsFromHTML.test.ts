@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getURLsFromHTML } from '../crawl'
+import { getURLsFromHTML } from '../data_handling'
 
 describe('getURLsFromHTML', () => {
   const baseURL = 'https://example.com';

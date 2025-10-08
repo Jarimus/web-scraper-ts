@@ -1,104 +1,41 @@
 import { URL } from "node:url"
-import { JSDOM } from "jsdom"
+import { getURLsFromHTML, normalizeURL } from "./data_handling"
+import { getHTML } from "./getHTML"
 
-export function normalizeURL(inputURL:string): string {
-  const urlObject = new URL(inputURL.toLowerCase())
-  return `${urlObject.protocol}//${urlObject.hostname}${urlObject.pathname.replace(/\/$/, "")}`
-}
+export async function crawlPage(
+  baseURL: string,
+  currentURL: string = baseURL,
+  pages: Record<string, number> = {},
+) {
+  // Stay within the same domain. Do not crawl further.
+  const baseURLobj = new URL(baseURL)
+  const currentURLobj = new URL(currentURL)
+  if (baseURLobj.origin !== currentURLobj.origin) {
+    return pages
+  }
+  // Check with the normalized URL whether the page has been visited already.
+  // Only increment if it has been visited before.
+  const normalizedCurrentURL = normalizeURL(currentURL)
+  if (pages[normalizedCurrentURL]) {
+    pages[normalizedCurrentURL]++
+    return
+  } else {
+    pages[normalizedCurrentURL] = 1
+  }
+  // get HTML for current URL
+  console.log(`Getting html for ${currentURL}`)
+  let html = ""
+  try {
+    html = await getHTML(currentURL)
+  } catch {
+    return
+  }
+  const newURLs = getURLsFromHTML(html, baseURL)
+  const newCrawls: Promise<Record<string, number> | undefined>[] = []
+  newURLs.forEach(async url => {
+    newCrawls.push(crawlPage(baseURL, url, pages))
+  })
+  await Promise.all(newCrawls)
 
-type ExtractedPageData = {
-  url: string,
-  h1: string,
-  first_paragraph: string,
-  outgoing_links: string[],
-  image_urls: string[]
-}
-
-export function extractPageData(html: string, pageURL: string): ExtractedPageData {
-  if (html === "" || pageURL === "") {
-    return {
-      url: pageURL,
-      h1: "",
-      first_paragraph: "",
-      outgoing_links: [],
-      image_urls: []
-    }
-  }
-  if ((typeof html !== "string") || (typeof pageURL !== "string")) {
-    throw new Error("html or pageURL parameter is not a string")
-  }
-  return {
-    url: pageURL,
-    h1: getH1FromHTML(html),
-    first_paragraph: getFirstParagraphFromHTML(html),
-    outgoing_links: getURLsFromHTML(html, pageURL),
-    image_urls: getImagesFromHTML(html, pageURL)
-  }
-}
-
-export function getH1FromHTML(html: string): string {
-  if (typeof html !== "string") {
-    throw Error("html is not a string")
-  }
-  const doc = new JSDOM(html)
-  const h1element = doc.window.document.querySelector("h1")
-  if (!h1element) {
-    return ""
-  }
-  return h1element.textContent.trim()
-}
-
-export function getFirstParagraphFromHTML(html: string): string {
-  if (typeof html !== "string") {
-    throw Error("html is not a string")
-  }
-  const doc = new JSDOM(html)
-  let firstPara = ""
-  const mainSection = doc.window.document.querySelector("main")
-  if (mainSection) {
-    const queryMainP = mainSection.querySelector("p")
-    firstPara = queryMainP ? queryMainP.textContent : ""
-  } 
-  if (firstPara == "") {
-    const queryP = doc.window.document.querySelector("p")
-    firstPara = queryP ? queryP.textContent : ""
-  }
-  return firstPara.trim()
-}
-
-export function getURLsFromHTML(html: string, baseURL: string): string[] {
-  if (typeof html !== "string") {
-    throw Error("html is not a string")
-  }
-  const result: string[] = []
-  const doc = new JSDOM(html)
-  const queryA = doc.window.document.querySelectorAll("a")
-  for (const a of queryA) {
-    const link = a.getAttribute("href")
-    if (link) {
-      const linkObj = new URL(link, baseURL)
-      result.push(linkObj.toString())
-    }
-  }
-
-  return result
-}
-
-export function getImagesFromHTML(html: string, baseURL: string): string[] {
-  if (typeof html !== "string") {
-    throw Error("html is not a string")
-  }
-
-  const result: string[] = []
-  const doc = new JSDOM(html)
-  const queryA = doc.window.document.querySelectorAll("img")
-  for (const a of queryA) {
-    const link = a.getAttribute("src")
-    if (link) {
-      const linkObj = new URL(link, baseURL)
-      result.push(linkObj.toString())
-    }
-  }
-
-  return result
+  return pages
 }

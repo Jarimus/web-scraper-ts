@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getFirstParagraphFromHTML } from '../crawl'; // Adjust the import based on your file structure
+import { getFirstParagraphFromHTML } from '../data_handling'; // Adjust the import based on your file structure
 
 describe('getFirstParagraphFromHTML', () => {
   it('should return the text content of a single p tag', () => {
